@@ -2,6 +2,27 @@
 
 An AI-powered product management assistant grounded in Lenny's Podcast transcripts and newsletters. Built as a Forward Deployed Engineer take-home assignment.
 
+<p align="center">
+  <img src="assets/welcome-screen.png" alt="Welcome Screen" width="800"/>
+</p>
+
+## Screenshots
+
+<details>
+<summary><b>View Application Screenshots</b></summary>
+<br/>
+
+**RAG-Powered Q&A**
+<img src="assets/chat-qa.png" alt="Q&A Chat" width="800"/>
+
+**Ship 30 for 30 Essay Generation**
+<img src="assets/essay-generation.png" alt="Essay Generation" width="800"/>
+
+**HTML Document Generation (Sandboxed Viewer)**
+<img src="assets/html-artifact.png" alt="HTML Artifact" width="800"/>
+
+</details>
+
 ## Features
 
 - 💬 **RAG-Powered Q&A** — Answers product management and growth questions using 50 podcast transcripts and 10 newsletter articles
@@ -11,6 +32,50 @@ An AI-powered product management assistant grounded in Lenny's Podcast transcrip
 - 🔄 **Multi-Session Chat** — Independent conversations with PostgreSQL persistence
 - 🤖 **Model Switching** — Supports Ollama (local), OpenAI, and Anthropic via configuration
 - 🐳 **Docker Compose** — One-command deployment
+
+## Architecture
+
+```mermaid
+graph TD
+    subgraph Client ["Frontend"]
+        UI[React + Vite UI]
+        Viewer[Artifact Viewer]
+    end
+    
+    subgraph Server ["Backend (FastAPI)"]
+        API[API Router]
+        Agent[Agent Orchestrator]
+        RAG[RAG Retrieval]
+        Provider[LLM Provider Factory]
+    end
+    
+    subgraph Data ["Data Layer"]
+        DB[(PostgreSQL + pgvector)]
+    end
+    
+    subgraph Models ["LLM Models"]
+        Ollama[Ollama Local]
+        OpenAI[OpenAI Cloud]
+        Anthropic[Anthropic Cloud]
+    end
+
+    UI <-->|REST API| API
+    Viewer --- UI
+    
+    API <--> Agent
+    Agent <--> RAG
+    RAG <-->|SQL/Vector Search| DB
+    Agent <--> Provider
+    
+    Provider -.- Ollama
+    Provider -.- OpenAI
+    Provider -.- Anthropic
+
+    style Client fill:#e6f3ff,stroke:#0066cc,stroke-width:2px,color:#333
+    style Server fill:#f0f7f0,stroke:#2ca02c,stroke-width:2px,color:#333
+    style Data fill:#fff2e6,stroke:#ff7f0e,stroke-width:2px,color:#333
+    style Models fill:#f4e6ff,stroke:#9467bd,stroke-width:2px,color:#333
+```
 
 ## Prerequisites
 
