@@ -50,6 +50,55 @@ export function ArtifactViewer({
   // --- Render ---
   return (
     <div className="flex h-full w-full overflow-hidden" style={{ backgroundColor: 'var(--color-surface)' }}>
+      {/* Sidebar for Artifacts */}
+      {messagesWithArtifacts.length > 0 && (
+        <div 
+          className="w-56 border-r flex flex-col flex-shrink-0 bg-[#f8fafc]"
+          style={{ borderColor: 'var(--color-border)' }}
+        >
+          <div className="px-4 py-4 border-b" style={{ borderColor: 'var(--color-border)' }}>
+            <h3 className="text-sm font-bold" style={{ color: 'var(--color-text)' }}>Documents</h3>
+            <p className="text-xs" style={{ color: 'var(--color-text-dim)' }}>{messagesWithArtifacts.length} in this chat</p>
+          </div>
+          <div className="flex-1 overflow-y-auto p-2 flex flex-col gap-1">
+            {messagesWithArtifacts.map((msg) => (
+              <button
+                key={msg.id}
+                onClick={() => {
+                  if (msg.artifact) onSelectArtifact(msg.artifact);
+                }}
+                className="flex items-center gap-2.5 p-2.5 rounded-lg text-left transition-all cursor-pointer"
+                style={{
+                  backgroundColor: activeArtifact === msg.artifact ? 'white' : 'transparent',
+                  boxShadow: activeArtifact === msg.artifact ? '0 1px 2px rgba(0,0,0,0.05)' : 'none',
+                  border: '1px solid',
+                  borderColor: activeArtifact === msg.artifact ? 'rgba(79,70,229,0.2)' : 'transparent',
+                }}
+                onMouseEnter={e => {
+                  if (activeArtifact !== msg.artifact) {
+                    e.currentTarget.style.backgroundColor = 'rgba(0,0,0,0.03)';
+                  }
+                }}
+                onMouseLeave={e => {
+                  if (activeArtifact !== msg.artifact) {
+                    e.currentTarget.style.backgroundColor = 'transparent';
+                  }
+                }}
+              >
+                <div className="w-6 h-6 rounded flex items-center justify-center flex-shrink-0" style={{ backgroundColor: activeArtifact === msg.artifact ? 'rgba(79,70,229,0.1)' : 'rgba(0,0,0,0.05)' }}>
+                  <FileText size={12} style={{ color: activeArtifact === msg.artifact ? 'var(--color-primary)' : 'var(--color-text-dim)' }} />
+                </div>
+                <div className="flex flex-col min-w-0">
+                  <span className="text-xs font-semibold truncate" style={{ color: activeArtifact === msg.artifact ? '#1a1f36' : 'var(--color-text)' }}>
+                    {msg.artifact?.title || 'Untitled Document'}
+                  </span>
+                </div>
+              </button>
+            ))}
+          </div>
+        </div>
+      )}
+
       {/* Main Content Area */}
       <div className="flex-1 flex flex-col min-w-0 relative">
         {/* Loading Overlay */}
@@ -111,6 +160,17 @@ export function ArtifactViewer({
                   );
                 })()}
               </div>
+              <button
+                onClick={onClose}
+                className="p-2 rounded-lg transition-colors cursor-pointer flex-shrink-0 ml-4"
+                style={{ color: 'var(--color-text-dim)' }}
+                onMouseEnter={e => e.currentTarget.style.backgroundColor = 'var(--color-surface-lighter)'}
+                onMouseLeave={e => e.currentTarget.style.backgroundColor = 'transparent'}
+                aria-label="Close document viewer"
+                title="Close Essay"
+              >
+                <X size={20} />
+              </button>
             </div>
 
             {/* Content */}
