@@ -1,9 +1,9 @@
 /* ArtifactViewer — renders Markdown or HTML artifacts with actions */
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
-import { X, FileText, Code, Copy, Check, Download, RefreshCw } from 'lucide-react';
+import { X, FileText, Code, Copy, Check, Download, RefreshCw, ChevronsLeft, ChevronsRight } from 'lucide-react';
 import type { Artifact, Message } from '../types';
 
 interface ArtifactViewerProps {
@@ -24,6 +24,14 @@ export function ArtifactViewer({
   isLoading,
 }: ArtifactViewerProps) {
   const [copied, setCopied] = useState(false);
+  const [showSidebar, setShowSidebar] = useState(() => {
+    const saved = localStorage.getItem('lenny_showArtifactSidebar');
+    return saved !== null ? saved === 'true' : true;
+  });
+
+  useEffect(() => {
+    localStorage.setItem('lenny_showArtifactSidebar', showSidebar.toString());
+  }, [showSidebar]);
 
   // --- Action handlers ---
   const handleCopy = () => {
@@ -49,16 +57,37 @@ export function ArtifactViewer({
 
   // --- Render ---
   return (
-    <div className="flex h-full w-full overflow-hidden" style={{ backgroundColor: 'var(--color-surface)' }}>
+    <div className="flex h-full w-full overflow-hidden relative" style={{ backgroundColor: 'var(--color-surface)' }}>
+      {/* Expand sidebar button when collapsed */}
+      {messagesWithArtifacts.length > 0 && !showSidebar && (
+        <button
+          onClick={() => setShowSidebar(true)}
+          className="absolute left-0 top-[22px] z-20 p-2 bg-white border border-l-0 rounded-r-lg shadow-sm text-gray-500 hover:text-gray-700 hover:bg-gray-50 cursor-pointer flex items-center justify-center"
+          style={{ borderColor: 'var(--color-border)', width: '32px', height: '32px' }}
+          title="Expand Documents"
+        >
+          <ChevronsRight size={16} />
+        </button>
+      )}
+
       {/* Sidebar for Artifacts */}
-      {messagesWithArtifacts.length > 0 && (
+      {messagesWithArtifacts.length > 0 && showSidebar && (
         <div 
-          className="w-56 border-r flex flex-col flex-shrink-0 bg-[#f8fafc]"
+          className="w-48 md:w-56 border-r flex flex-col flex-shrink-0 bg-[#f8fafc] transition-all"
           style={{ borderColor: 'var(--color-border)' }}
         >
-          <div className="px-4 py-4 border-b" style={{ borderColor: 'var(--color-border)' }}>
-            <h3 className="text-sm font-bold" style={{ color: 'var(--color-text)' }}>Documents</h3>
-            <p className="text-xs" style={{ color: 'var(--color-text-dim)' }}>{messagesWithArtifacts.length} in this chat</p>
+          <div className="px-4 py-4 border-b flex justify-between items-center" style={{ borderColor: 'var(--color-border)' }}>
+            <div>
+              <h3 className="text-sm font-bold" style={{ color: 'var(--color-text)' }}>Documents</h3>
+              <p className="text-xs" style={{ color: 'var(--color-text-dim)' }}>{messagesWithArtifacts.length} in this chat</p>
+            </div>
+            <button 
+              onClick={() => setShowSidebar(false)} 
+              className="p-1 rounded hover:bg-gray-200 text-gray-400 hover:text-gray-600 transition-colors cursor-pointer"
+              title="Collapse Documents"
+            >
+              <ChevronsLeft size={16} />
+            </button>
           </div>
           <div className="flex-1 overflow-y-auto p-2 flex flex-col gap-1">
             {messagesWithArtifacts.map((msg) => (
@@ -160,17 +189,30 @@ export function ArtifactViewer({
                   );
                 })()}
               </div>
-              <button
-                onClick={onClose}
-                className="p-2 rounded-lg transition-colors cursor-pointer flex-shrink-0 ml-4"
-                style={{ color: 'var(--color-text-dim)' }}
-                onMouseEnter={e => e.currentTarget.style.backgroundColor = 'var(--color-surface-lighter)'}
-                onMouseLeave={e => e.currentTarget.style.backgroundColor = 'transparent'}
-                aria-label="Close document viewer"
-                title="Close Essay"
-              >
-                <X size={20} />
-              </button>
+              <div className="flex items-center gap-2 flex-shrink-0 ml-4">
+                <button
+                  onClick={handleDownload}
+                  className="w-9 h-9 flex items-center justify-center rounded-lg transition-colors cursor-pointer bg-gray-50 border border-gray-100 text-gray-600 hover:bg-gray-100"
+                  title="Download Document"
+                >
+                  <Download size={16} />
+                </button>
+                <button
+                  onClick={handleCopy}
+                  className="w-9 h-9 flex items-center justify-center rounded-lg transition-colors cursor-pointer bg-gray-50 border border-gray-100 text-gray-600 hover:bg-gray-100"
+                  title="Copy Document"
+                >
+                  {copied ? <Check size={16} className="text-green-500" /> : <Copy size={16} />}
+                </button>
+                <button
+                  onClick={onClose}
+                  className="w-9 h-9 flex items-center justify-center rounded-lg transition-colors cursor-pointer bg-gray-50 border border-gray-100 text-gray-600 hover:bg-gray-100"
+                  aria-label="Close document viewer"
+                  title="Close Essay"
+                >
+                  <X size={18} />
+                </button>
+              </div>
             </div>
 
             {/* Content */}
@@ -185,28 +227,6 @@ export function ArtifactViewer({
                 )}
               </div>
 
-              {/* Bottom Actions */}
-              <div className="mt-8 pt-4 border-t flex justify-end" style={{ borderColor: 'var(--color-border)' }}>
-                <button
-                  onClick={handleCopy}
-                  className="flex items-center gap-2 px-5 py-2.5 rounded-xl text-[14px] font-semibold transition-all duration-200 cursor-pointer border"
-                  style={{
-                    backgroundColor: 'white',
-                    color: '#4f46e5',
-                    borderColor: '#a5b4fc',
-                    boxShadow: '0 1px 2px rgba(0,0,0,0.05)',
-                  }}
-                  onMouseEnter={e => {
-                    e.currentTarget.style.backgroundColor = '#f0f3ff';
-                  }}
-                  onMouseLeave={e => {
-                    e.currentTarget.style.backgroundColor = 'white';
-                  }}
-                >
-                  {copied ? <Check size={16} /> : <Copy size={16} />}
-                  {copied ? 'Copied to Clipboard' : 'Copy Document'}
-                </button>
-              </div>
             </div>
           </>
         )}
@@ -258,8 +278,19 @@ function ActionButton({
  * - allow-scripts is omitted to block JavaScript execution entirely
  */
 function HtmlRenderer({ content }: { content: string }) {
+  let cleanContent = content;
+  
+  // Extract content from inside ```html ... ``` if the LLM wrapped it in a code block
+  const match = content.match(/```(?:html)?\s*([\s\S]*?)\s*```/i);
+  if (match) {
+    cleanContent = match[1];
+  } else {
+    // Fallback if it just starts with ```html but lacks closing
+    cleanContent = content.replace(/^```(?:html)?\s*/i, '').replace(/```\s*$/, '');
+  }
+
   // Validate content is actually HTML-like
-  if (!content || (!content.includes('<') && !content.includes('>'))) {
+  if (!cleanContent || (!cleanContent.includes('<') && !cleanContent.includes('>'))) {
     return (
       <div className="p-4 rounded-lg" style={{ backgroundColor: 'var(--color-surface-light)' }}>
         <p className="text-sm" style={{ color: 'var(--color-error)' }}>
@@ -271,7 +302,7 @@ function HtmlRenderer({ content }: { content: string }) {
 
   return (
     <iframe
-      srcDoc={content}
+      srcDoc={cleanContent}
       sandbox=""
       title="Artifact HTML content"
       className="w-full rounded-lg border"

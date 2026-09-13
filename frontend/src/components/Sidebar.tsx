@@ -8,7 +8,7 @@ interface SidebarProps {
   sessions: Session[];
   activeSessionId: string | null;
   config: AppConfig | null;
-  onSelectSession: (id: string) => void;
+  onSelectSession: (id: string | null) => void;
   onNewChat: () => void;
   onDeleteSession: (id: string) => void;
   onUpdateSession: (id: string, title: string) => void;
@@ -32,15 +32,16 @@ export function Sidebar({
 
   return (
     <aside
-      className="flex flex-col h-full border-r"
+      className="flex flex-col h-full border-r w-[260px] md:w-[280px] flex-shrink-0"
       style={{
-        width: '280px',
-        minWidth: '280px',
         backgroundColor: 'var(--color-surface)',
         borderColor: 'var(--color-border)',
       }}
     >
-      <div className="p-4 flex items-center gap-3">
+      <div 
+        className="p-4 flex items-center gap-3 cursor-pointer hover:bg-gray-50 transition-colors"
+        onClick={() => onSelectSession(null)}
+      >
         <div
           className="w-10 h-10 rounded-xl flex items-center justify-center flex-shrink-0"
           style={{ background: 'linear-gradient(135deg, var(--color-primary), var(--color-accent))' }}

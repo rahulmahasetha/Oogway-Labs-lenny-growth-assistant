@@ -2,7 +2,7 @@
 
 import { useState, useCallback, useEffect } from 'react';
 import { QueryClient, QueryClientProvider, useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { PanelRightOpen, PanelRightClose, Menu, X } from 'lucide-react';
+import { PanelRightOpen, PanelRightClose, PanelLeftOpen, PanelLeftClose, Menu, X } from 'lucide-react';
 import { Sidebar } from './components/Sidebar';
 import { ChatArea } from './components/ChatArea';
 import { ArtifactViewer } from './components/ArtifactViewer';
@@ -19,9 +19,24 @@ function AppContent() {
   const qc = useQueryClient();
   const [activeSessionId, setActiveSessionId] = useState<string | null>(null);
   const [activeArtifact, setActiveArtifact] = useState<Artifact | null>(null);
-  const [showArtifact, setShowArtifact] = useState(false);
+  const [showArtifact, setShowArtifact] = useState(() => {
+    const saved = localStorage.getItem('lenny_showArtifact');
+    return saved !== null ? saved === 'true' : false;
+  });
   const [showMobileSidebar, setShowMobileSidebar] = useState(false);
+  const [showDesktopSidebar, setShowDesktopSidebar] = useState(() => {
+    const saved = localStorage.getItem('lenny_showSidebar');
+    return saved !== null ? saved === 'true' : true;
+  });
   const [isIngesting, setIsIngesting] = useState(false);
+
+  useEffect(() => {
+    localStorage.setItem('lenny_showSidebar', showDesktopSidebar.toString());
+  }, [showDesktopSidebar]);
+
+  useEffect(() => {
+    localStorage.setItem('lenny_showArtifact', showArtifact.toString());
+  }, [showArtifact]);
 
 
   const { data: sessions = [] } = useQuery<Session[]>({
@@ -162,7 +177,7 @@ function AppContent() {
       <div
         className={`${
           showMobileSidebar ? 'fixed inset-y-0 left-0 z-50' : 'hidden'
-        } md:relative md:flex`}
+        } ${showDesktopSidebar ? 'md:relative md:flex' : 'md:hidden'} transition-all duration-300 flex-shrink-0`}
       >
         <Sidebar
           sessions={sessions}
@@ -181,7 +196,7 @@ function AppContent() {
       </div>
 
       {/* Main content */}
-      <div className="flex-1 flex flex-col min-w-0">
+      <div className="flex-1 flex flex-col min-w-0 min-h-0">
         {/* Mobile header */}
         <div
           className="flex items-center justify-between px-4 py-3 md:hidden border-b"
@@ -196,7 +211,8 @@ function AppContent() {
             <Menu size={20} />
           </button>
           <h1
-            className="text-sm font-bold"
+            className="text-sm font-bold cursor-pointer"
+            onClick={() => setActiveSessionId(null)}
             style={{
               background: 'linear-gradient(135deg, var(--color-primary-light), var(--color-accent))',
               WebkitBackgroundClip: 'text',
@@ -216,14 +232,25 @@ function AppContent() {
         </div>
 
         {/* Chat + Artifact split */}
-        <div className="flex-1 flex overflow-hidden">
+        <div className="flex-1 flex overflow-hidden min-h-0">
           {/* Chat area */}
-          <div className="flex-1 flex flex-col min-w-0">
+          <div className={`flex-1 flex flex-col min-w-0 min-h-0 ${showArtifact ? 'hidden md:flex' : ''}`}>
             {/* Desktop artifact toggle */}
             <div
-              className="hidden md:flex items-center justify-end px-4 py-2 border-b"
+              className="hidden md:flex items-center justify-between px-4 py-2 border-b"
               style={{ borderColor: 'var(--color-border)' }}
             >
+              {/* Left Side Toggle */}
+              <button
+                onClick={() => setShowDesktopSidebar(!showDesktopSidebar)}
+                className="p-2 rounded-lg cursor-pointer text-gray-500 hover:bg-gray-100 transition-colors"
+                aria-label="Toggle Sidebar"
+                title={showDesktopSidebar ? 'Close Sidebar' : 'Open Sidebar'}
+              >
+                {showDesktopSidebar ? <PanelLeftClose size={18} /> : <PanelLeftOpen size={18} />}
+              </button>
+
+              {/* Right Side Toggle */}
               <button
                 onClick={() => setShowArtifact(!showArtifact)}
                 className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium transition-all duration-200 cursor-pointer shadow-sm"
@@ -255,10 +282,8 @@ function AppContent() {
           {/* Artifact viewer panel */}
           {showArtifact && (
             <div
-              className="border-l"
+              className="w-full md:w-[45%] lg:w-[50%] max-w-[800px] flex-shrink-0 min-w-0 min-h-0 md:min-w-[320px] flex flex-col border-l"
               style={{
-                width: '45%',
-                minWidth: '350px',
                 borderColor: 'var(--color-border)',
               }}
             >
