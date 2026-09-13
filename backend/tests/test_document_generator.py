@@ -55,23 +55,22 @@ class TestCheckAndGenerateClarification:
     async def test_needs_clarification(self):
         class MockProvider:
             async def generate(self, **kwargs):
-                return '{"needs_clarification": true, "questions": ["Who is the audience?", "What is the goal?"]}'
+                return "- Who is the audience?\n- What is the goal?"
 
-        result, msg = await check_and_generate_clarification("Create a document", MockProvider())
-        assert result is True
+        msg = await check_and_generate_clarification("Create a document", [], MockProvider())
+        assert msg is not None
         assert "Who is the audience?" in msg
 
     @pytest.mark.asyncio
     async def test_no_clarification_needed(self):
         class MockProvider:
             async def generate(self, **kwargs):
-                return '{"needs_clarification": false, "questions": []}'
+                return "CLEAR"
 
-        result, msg = await check_and_generate_clarification(
-            "Create a document for PMs about retention, just generate it", MockProvider()
+        msg = await check_and_generate_clarification(
+            "Create a document for PMs about retention, just generate it", [], MockProvider()
         )
-        assert result is False
-        assert msg == ""
+        assert msg is None
 
 
 # has_prior_clarification
@@ -235,5 +234,4 @@ class TestGenerateDocument:
 
         # The prompt sent to the LLM should include the user's answers
         assert provider.last_messages is not None
-        user_msg = provider.last_messages[0]["content"]
-        assert "additional details" in user_msg.lower()
+        assert any("for product managers" in msg["content"].lower() for msg in provider.last_messages)
