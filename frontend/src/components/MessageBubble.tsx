@@ -22,7 +22,7 @@ export function MessageBubble({ message, onViewArtifact }: MessageBubbleProps) {
   };
 
   return (
-    <div className={`flex gap-3 animate-fade-in ${isUser ? 'justify-end' : ''}`}>
+    <div className={`flex gap-3 animate-fade-in w-full min-w-0 ${isUser ? 'justify-end' : ''}`}>
       {/* Avatar */}
       {!isUser && (
         <div
@@ -35,10 +35,10 @@ export function MessageBubble({ message, onViewArtifact }: MessageBubbleProps) {
         </div>
       )}
 
-      <div className={`flex flex-col gap-2 ${isUser ? 'items-end' : ''}`} style={{ maxWidth: '75%' }}>
+      <div className={`flex flex-col gap-2 ${isUser ? 'items-end' : 'w-full'} min-w-0`} style={{ maxWidth: isUser ? '85%' : '100%' }}>
         {/* Message content */}
         <div
-          className="px-4 py-3 rounded-2xl text-sm"
+          className="px-4 py-3 rounded-2xl text-sm min-w-0 overflow-x-auto"
           style={{
             backgroundColor: isUser ? 'var(--color-primary)' : 'var(--color-surface-light)',
             color: isUser ? 'white' : 'var(--color-text)',

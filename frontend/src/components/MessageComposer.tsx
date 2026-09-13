@@ -55,7 +55,7 @@ export function MessageComposer({ onSend, isLoading, disabled }: MessageComposer
           placeholder="Ask about product management, growth, or request a Ship 30 essay..."
           rows={1}
           disabled={isLoading || disabled}
-          className="flex-1 resize-none bg-transparent outline-none text-sm"
+          className="flex-1 resize-none bg-transparent outline-none text-sm min-w-0"
           style={{
             color: 'var(--color-text)',
             maxHeight: '200px',

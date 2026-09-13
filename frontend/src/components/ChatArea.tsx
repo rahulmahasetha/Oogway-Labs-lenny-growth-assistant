@@ -28,9 +28,9 @@ export function ChatArea({ messages, isLoading, onSend, onViewArtifact, hasSessi
   }
 
   return (
-    <div className="flex flex-col h-full">
+    <div className="flex flex-col h-full min-w-0 min-h-0">
       {/* Messages */}
-      <div className="flex-1 overflow-y-auto px-6 py-4">
+      <div className="flex-1 overflow-y-auto px-4 md:px-6 py-4 min-w-0 min-h-0">
         {messages.length === 0 && !isLoading && (
           <div className="flex flex-col items-center justify-center h-full">
             <Sparkles size={32} style={{ color: 'var(--color-primary-light)' }} />
@@ -64,7 +64,7 @@ export function ChatArea({ messages, isLoading, onSend, onViewArtifact, hasSessi
           </div>
         )}
 
-        <div className="space-y-6 max-w-5xl mx-auto">
+        <div className="space-y-8 max-w-4xl mx-auto pb-12">
           {messages.map(msg => (
             <MessageBubble
               key={msg.id}
