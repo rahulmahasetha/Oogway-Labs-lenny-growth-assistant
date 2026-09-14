@@ -37,12 +37,12 @@ logger = get_logger("ship30")
 
 # Keywords that trigger essay generation
 ESSAY_TRIGGERS = [
-    r"\bessay\b",
+    r"\b(essay|eassy|essasy)\b",
     r"\bship\s*30\b",
-    r"\batomic\s+essay\b",
+    r"\batomic\s+(essay|eassy|essasy)\b",
     r"\bwrite\s+(an?\s+)?(long|detailed|in-depth|comprehensive)\s+(piece|article|post)\b",
-    r"\bwrite\s+(me\s+)?(an?\s+)?(essay|article|piece|post|blog)\b",
-    r"\bgenerate\s+(an?\s+)?(essay|article|piece|post)\b",
+    r"\bwrite\s+(me\s+)?(an?\s+)?(essay|eassy|essasy|article|piece|post|blog)\b",
+    r"\bgenerate\s+(an?\s+)?(essay|eassy|essasy|article|piece|post)\b",
     r"\b(deep\s*dive|long[- ]form)\b",
 ]
 
